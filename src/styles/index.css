@@ -1,0 +1,1500 @@
+/* ------------------------------------------------------------------
+   Tokens. Graph paper + navy ink; the cat's orange marks what YOU do,
+   pen blue marks the truth. Both pairs validated for color-vision
+   deficiency and contrast against their paper.
+   ------------------------------------------------------------------ */
+:root {
+  color-scheme: light;
+  --paper: #f6f8fc;
+  --paper-grid: #e9eef7;
+  --surface: #ffffff;
+  --grid: #e1e8f3;
+  --grid-strong: #c4cfe2;
+  --ink: #1b2742;
+  --ink-2: #44516e;
+  --muted: #66738f;
+
+  --tabby: #d06a0c; /* your answer */
+  --tabby-strong: #a95405; /* button fill, text on light */
+  --tabby-shadow: #7f3f04;
+  --pen: #2f62d0; /* the truth */
+  --pen-soft: #e6eefc;
+  --bars: #a9b6cc;
+  --bars-hover: #8796b2;
+
+  --good: #1e7f55;
+  --good-bg: #e2f3ea;
+  --bad: #b8364c;
+  --bad-bg: #fbe7ea;
+  --highlight: #ffd84d;
+
+  --cat-fur: #e8913a;
+  --cat-stripe: #b8580f;
+  --cat-muzzle: #fff3e2;
+  --cat-ear: #f4b3a0;
+  --cat-ink: #2a2230;
+  --cat-nose: #e36f7e;
+
+  --font-display: "Bricolage Grotesque Variable", "Trebuchet MS", sans-serif;
+  --font-body: "Figtree Variable", "Segoe UI", system-ui, sans-serif;
+  --radius-s: 10px;
+  --radius-m: 16px;
+  --radius-l: 22px;
+  --page: 720px;
+  --chip-h: 38px; /* stats and the settings button share this height */
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #131b2c;
+  --paper-grid: #182338;
+  --surface: #1a2438;
+  --grid: #24314b;
+  --grid-strong: #34425f;
+  --ink: #e8edf7;
+  --ink-2: #b8c3d9;
+  --muted: #8e9bb5;
+
+  --tabby: #d07a20;
+  --tabby-strong: #d07a20;
+  --tabby-shadow: #8a4b0c;
+  --pen: #5a88ec;
+  --pen-soft: #22325a;
+  --bars: #4c5c7c;
+  --bars-hover: #66779a;
+
+  --good: #4cc08a;
+  --good-bg: #173a2c;
+  --bad: #ef7a8d;
+  --bad-bg: #3d1d26;
+}
+
+/* ------------------------------------------------------------------
+   Base
+   ------------------------------------------------------------------ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--ink);
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--paper-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--paper-grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-position: -1px -1px;
+}
+
+#root {
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 0 16px;
+  min-height: 100dvh;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  line-height: 1.15;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--pen);
+  outline-offset: 3px;
+}
+
+.tex {
+  font-size: 1.05em;
+}
+
+/* ------------------------------------------------------------------
+   Buttons
+   ------------------------------------------------------------------ */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: var(--radius-m);
+  font: 700 1.05rem/1 var(--font-body);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 80ms ease, box-shadow 80ms ease;
+}
+
+.button.primary {
+  color: #fff;
+  background: var(--tabby-strong);
+  box-shadow: 0 4px 0 var(--tabby-shadow);
+}
+
+.button.primary:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--tabby-shadow);
+}
+
+.button.primary:disabled {
+  color: var(--muted);
+  background: var(--grid);
+  box-shadow: 0 4px 0 var(--grid-strong);
+  cursor: not-allowed;
+}
+
+.button.ghost {
+  color: var(--ink);
+  background: transparent;
+  border: 2px solid var(--grid-strong);
+}
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+  color: var(--muted);
+}
+
+.icon-button svg path {
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.icon-button:hover {
+  color: var(--ink);
+  background: var(--grid);
+}
+
+/* ------------------------------------------------------------------
+   Home
+   ------------------------------------------------------------------ */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 0 8px;
+}
+
+.brand {
+  font: 700 1.4rem/1 var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.topbar-end {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stats {
+  display: flex;
+  gap: 8px;
+}
+
+.stat {
+  white-space: nowrap;
+}
+
+.stat-short {
+  display: none;
+}
+
+/* Narrow phones: numbers only; the full text stays for screen readers. */
+@media (max-width: 480px) {
+  .stats {
+    gap: 6px;
+  }
+  .stat {
+    padding: 0 10px;
+  }
+  .stat-short {
+    display: inline;
+  }
+  .stat-full {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Settings */
+.settings {
+  position: relative;
+}
+
+/* Same chip as the stats next to it, so the row reads as one set. */
+.icon-button.settings-button {
+  width: var(--chip-h);
+  height: var(--chip-h);
+  color: var(--ink-2);
+  background: var(--surface);
+  border: 1px solid var(--grid);
+  cursor: pointer;
+}
+
+.icon-button.settings-button:hover {
+  color: var(--ink);
+  background: var(--surface);
+  border-color: var(--grid-strong);
+}
+
+.icon-button.settings-button[aria-expanded="true"] {
+  color: var(--tabby);
+  border-color: var(--tabby);
+}
+
+.settings-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.settings-button svg circle,
+.settings-button svg path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+
+.settings-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 20;
+  display: grid;
+  gap: 14px;
+  width: min(330px, calc(100vw - 32px));
+  padding: 16px;
+  border-radius: var(--radius-l);
+  background: var(--surface);
+  border: 1px solid var(--grid-strong);
+  box-shadow: 0 12px 32px rgb(15 25 50 / 0.16);
+}
+
+.segmented {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.segmented legend {
+  padding: 0;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.segmented-options {
+  display: flex;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--paper);
+  border: 1px solid var(--grid);
+}
+
+.segmented label {
+  flex: 1 1 0;
+  min-width: 0;
+  position: relative;
+  padding: 8px 4px;
+  border-radius: 9px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.segmented label:hover {
+  color: var(--ink);
+}
+
+.segmented-content {
+  position: relative; /* above the thumb */
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.segmented-thumb {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--surface);
+  box-shadow: 0 1px 0 var(--grid-strong), 0 0 0 1px var(--grid-strong);
+}
+
+.option-icon {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.option-icon-fill {
+  fill: currentColor;
+  stroke: none;
+}
+
+.option-icon {
+  transition: color 160ms ease, transform 260ms cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.segmented label.is-checked .option-icon {
+  color: var(--tabby);
+  transform: rotate(-12deg) scale(1.12);
+}
+
+.segmented label.is-checked .flag {
+  transform: scale(1.08);
+}
+
+.flag {
+  flex: none;
+  border-radius: 3px;
+  transition: transform 260ms cubic-bezier(0.3, 1.6, 0.5, 1);
+  /* hairline so the white stripes don't melt into a light background */
+  box-shadow: 0 0 0 1px var(--grid-strong);
+}
+
+.segmented label.is-checked {
+  color: var(--ink);
+}
+
+.segmented input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.segmented label:has(input:focus-visible) {
+  outline: 3px solid var(--pen);
+  outline-offset: 1px;
+}
+
+.stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--chip-h);
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--grid);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.stat-icon.streak path {
+  fill: var(--tabby);
+}
+
+.stat-icon.xp path {
+  fill: var(--highlight);
+  stroke: var(--tabby-strong);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+
+.hero {
+  display: grid;
+  gap: 8px;
+  padding: 24px 0 40px;
+}
+
+.hero-art {
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+  justify-self: center;
+  overflow: visible;
+}
+
+.hero-curve {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.hero-area {
+  fill: var(--tabby);
+  fill-opacity: 0.14;
+}
+
+[data-theme="dark"] .hero-area,
+[data-theme="dark"] .series-user .curve-area {
+  fill-opacity: 0.22;
+}
+
+.hero-base {
+  stroke: var(--grid-strong);
+  stroke-width: 1.5;
+}
+
+.hero-rug {
+  stroke: var(--pen);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.hero-copy {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+}
+
+.hero-copy h1 {
+  font-size: clamp(2.6rem, 9vw, 4.2rem);
+  font-weight: 800;
+  font-variation-settings: "wdth" 85;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+}
+
+.hero-copy p {
+  font-size: 1.15rem;
+  color: var(--ink-2);
+  max-width: 34ch;
+}
+
+.hero-copy .button {
+  margin-top: 8px;
+}
+
+@media (min-width: 640px) {
+  .hero {
+    grid-template-columns: 1.1fr 1fr;
+    align-items: center;
+    gap: 24px;
+  }
+  .hero-art {
+    order: 2;
+  }
+}
+
+.path {
+  padding-bottom: 56px;
+}
+
+.path h2 {
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+}
+
+.path ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+/* The connecting line: lessons are a sequence. */
+.path ol::before {
+  content: "";
+  position: absolute;
+  left: 31px;
+  top: 32px;
+  bottom: 32px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--grid-strong);
+}
+
+.path-item + .path-item {
+  margin-top: 12px;
+}
+
+.path-link {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 10px 12px 10px 0;
+  text-decoration: none;
+  border-radius: var(--radius-m);
+}
+
+a.path-link:hover .path-title {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.node {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 3px solid var(--grid-strong);
+}
+
+.is-open .node {
+  border-color: var(--tabby);
+  box-shadow: 0 4px 0 var(--tabby-shadow);
+}
+
+.is-done .node {
+  border-color: var(--good);
+  background: var(--good-bg);
+}
+
+.is-locked .path-text {
+  opacity: 0.6;
+}
+
+.is-locked .node {
+  border-color: var(--grid);
+}
+
+.is-locked .glyph {
+  opacity: 0.45;
+}
+
+.glyph rect,
+.glyph circle {
+  fill: var(--ink-2);
+}
+
+.glyph-line {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.glyph-line.thin {
+  stroke-width: 2.5;
+}
+
+.glyph-text {
+  fill: var(--ink-2);
+  font: italic 700 17px/1 "Times New Roman", serif;
+}
+
+.is-open .glyph-text {
+  fill: var(--tabby-strong);
+}
+
+.glyph .glyph-knob {
+  fill: var(--surface);
+  stroke: var(--ink-2);
+  stroke-width: 2.5;
+}
+
+.is-open .glyph .glyph-knob {
+  fill: var(--surface);
+  stroke: var(--tabby-strong);
+}
+
+.is-open .glyph .glyph-outline {
+  fill: none;
+  stroke: var(--tabby-strong);
+}
+
+.glyph-line.accent {
+  stroke: var(--tabby);
+}
+
+.glyph .glyph-outline {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 2.5;
+}
+
+.is-open .glyph rect,
+.is-open .glyph circle {
+  fill: var(--tabby-strong);
+}
+
+.path-text {
+  display: grid;
+  gap: 2px;
+}
+
+.path-title {
+  font: 700 1.2rem/1.2 var(--font-display);
+}
+
+.path-summary {
+  color: var(--ink-2);
+}
+
+.path-status {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* ------------------------------------------------------------------
+   Lesson
+   ------------------------------------------------------------------ */
+.lesson {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.lesson-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+}
+
+.progress {
+  flex: 1;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--grid);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--tabby);
+}
+
+.lesson-body {
+  flex: 1;
+  padding: 8px 0 24px;
+}
+
+.review-tag {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--pen-soft);
+  color: var(--pen);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.prompt {
+  font-size: clamp(1.3rem, 4.5vw, 1.6rem);
+  font-weight: 700;
+  margin-bottom: 16px;
+  max-width: 30ch;
+}
+
+.prompt strong {
+  color: var(--tabby-strong);
+}
+
+.exercise {
+  display: grid;
+  gap: 16px;
+}
+
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--grid);
+  border-radius: var(--radius-l);
+  padding: 12px 12px 10px;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.92rem;
+  min-height: 1.4em;
+}
+
+.lesson-footer {
+  position: sticky;
+  bottom: 0;
+  margin: 0 -16px;
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+  background: var(--paper);
+  border-top: 2px solid var(--grid);
+}
+
+.lesson-footer.is-right {
+  background: var(--good-bg);
+  border-top-color: var(--good);
+}
+
+.lesson-footer.is-wrong {
+  background: var(--bad-bg);
+  border-top-color: var(--bad);
+}
+
+.feedback {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.feedback .mascot {
+  flex: none;
+}
+
+/* Keep the revealed chart in view on short screens. */
+.feedback-text {
+  max-height: 34dvh;
+  overflow-y: auto;
+}
+
+.feedback-text {
+  display: grid;
+  gap: 6px;
+  max-width: 62ch;
+}
+
+.feedback h2 {
+  font-size: 1.35rem;
+}
+
+.is-right .feedback h2 {
+  color: var(--good);
+}
+
+.is-wrong .feedback h2 {
+  color: var(--bad);
+}
+
+.footer-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.footer-actions .button {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .footer-actions .button {
+    width: auto;
+    min-width: 200px;
+  }
+}
+
+.is-right .button.primary {
+  background: var(--good);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--good) 60%, black);
+}
+
+.is-wrong .button.primary {
+  background: var(--bad);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--bad) 60%, black);
+}
+
+/* Review intro and summary share the centered column */
+.review-intro,
+.summary {
+  flex: 1;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 16px;
+  text-align: center;
+  padding: 32px 0 48px;
+  min-height: 70dvh;
+}
+
+.review-intro h1,
+.summary h1 {
+  font-size: clamp(1.8rem, 6vw, 2.4rem);
+}
+
+.review-intro p,
+.summary-message {
+  color: var(--ink-2);
+  max-width: 40ch;
+}
+
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 460px;
+  margin: 8px 0;
+}
+
+.summary-stats div {
+  padding: 12px 8px;
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  border: 1px solid var(--grid);
+}
+
+.summary-stats dt {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.summary-stats dd {
+  margin: 2px 0 0;
+  font: 700 1.5rem/1.2 var(--font-display);
+}
+
+.summary-actions {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.confetti {
+  position: fixed;
+  left: 50%;
+  top: 45%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.confetti span {
+  position: absolute;
+  display: block;
+}
+
+/* ------------------------------------------------------------------
+   Exercise controls
+   ------------------------------------------------------------------ */
+.controls {
+  display: grid;
+  gap: 10px;
+}
+
+.slider {
+  display: grid;
+  gap: 2px;
+  padding: 10px 14px 6px;
+  background: var(--surface);
+  border: 1px solid var(--grid);
+  border-radius: var(--radius-m);
+}
+
+.slider-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.slider-label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.slider-label .tex {
+  font-size: 1.35rem;
+}
+
+.slider-name {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.slider-value {
+  flex: none;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.slider input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.slider input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--tabby) var(--fill), var(--grid) var(--fill));
+}
+
+.slider input[type="range"]::-moz-range-track {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--tabby) var(--fill), var(--grid) var(--fill));
+}
+
+.slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  margin-top: -10px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 4px solid var(--tabby);
+  box-shadow: 0 2px 0 var(--tabby-shadow);
+}
+
+.slider input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 4px solid var(--tabby);
+}
+
+.slider input[type="range"]:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.choice {
+  min-height: 56px;
+  padding: 10px 12px;
+  border-radius: var(--radius-m);
+  border: 2px solid var(--grid-strong);
+  border-bottom-width: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 700 1.05rem/1.2 var(--font-body);
+  cursor: pointer;
+}
+
+/* Content inside answer buttons never takes the click (KaTeX boxes can poke out
+   of their button and steal taps from the neighbor). */
+.choice *,
+.curve-option *,
+.match-item * {
+  pointer-events: none;
+}
+
+.choice,
+.match-item {
+  overflow: hidden;
+}
+
+.choice:hover:not(:disabled) {
+  background: var(--paper);
+}
+
+.choice.selected {
+  border-color: var(--pen);
+  background: var(--pen-soft);
+  color: var(--pen);
+}
+
+.choice.right {
+  border-color: var(--good);
+  background: var(--good-bg);
+  color: var(--good);
+}
+
+.choice.wrong {
+  border-color: var(--bad);
+  background: var(--bad-bg);
+  color: var(--bad);
+  text-decoration: line-through;
+}
+
+.choice.dim {
+  opacity: 0.5;
+}
+
+.choice:disabled {
+  cursor: default;
+}
+
+.statement {
+  margin: 0;
+  padding: 18px 20px;
+  border-radius: var(--radius-l);
+  background: var(--surface);
+  border: 1px solid var(--grid);
+  border-left: 6px solid var(--pen);
+  font-size: 1.15rem;
+  line-height: 1.55;
+}
+
+.choices.is-stacked {
+  grid-template-columns: 1fr;
+}
+
+.choices.is-stacked .choice {
+  text-align: left;
+  font-weight: 400;
+  font-size: 1rem;
+}
+
+.curve-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.curve-option {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 8px 6px 6px;
+  border-radius: var(--radius-m);
+  border: 2px solid var(--grid-strong);
+  border-bottom-width: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  text-align: center;
+}
+
+.curve-option:hover:not(:disabled) {
+  border-color: var(--ink-2);
+}
+
+.curve-option.selected {
+  border-color: var(--pen);
+  background: var(--pen-soft);
+}
+
+.curve-option.right {
+  border-color: var(--good);
+  background: var(--good-bg);
+}
+
+.curve-option.wrong {
+  border-color: var(--bad);
+  background: var(--bad-bg);
+}
+
+.curve-option.dim {
+  opacity: 0.6;
+}
+
+.curve-option:disabled {
+  cursor: default;
+}
+
+.curve-option-letter {
+  position: absolute;
+  top: 6px;
+  left: 10px;
+  font: 700 0.9rem/1 var(--font-display);
+  color: var(--muted);
+}
+
+.curve-option-caption {
+  font-size: 0.8rem;
+  color: var(--ink-2);
+}
+
+.chart.is-compact .chart-axis text,
+.curve-option .chart-axis text {
+  font-size: 13px;
+}
+
+.match-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 10px;
+}
+
+.match-col {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.match-item {
+  position: relative;
+  min-height: 64px;
+  padding: 10px 12px;
+  border-radius: var(--radius-m);
+  border: 2px solid var(--grid-strong);
+  border-bottom-width: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 700 1rem/1.3 var(--font-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.match-item.meaning {
+  font-weight: 400;
+  font-size: 0.95rem;
+}
+
+.match-item:hover:not(:disabled) {
+  border-color: var(--ink-2);
+}
+
+.match-item.selected {
+  border-color: var(--pen);
+  background: var(--pen-soft);
+}
+
+/* Paired items share a numbered badge; the tint is a second, not the only, cue. */
+.match-item.paired {
+  padding-left: 40px;
+  border-color: var(--pair);
+  background: color-mix(in srgb, var(--pair) 12%, var(--surface));
+}
+
+.pair-0 { --pair: #d06a0c; }
+.pair-1 { --pair: #2f62d0; }
+.pair-2 { --pair: #8a4fbf; }
+.pair-3 { --pair: #0f8a8a; }
+
+.pair-badge {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--pair);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.match-item.right {
+  border-color: var(--good);
+  background: var(--good-bg);
+}
+
+.match-item.wrong {
+  border-color: var(--bad);
+  background: var(--bad-bg);
+}
+
+.match-item:disabled {
+  cursor: default;
+}
+
+/* ------------------------------------------------------------------
+   Charts
+   ------------------------------------------------------------------ */
+.chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: var(--font-body);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.chart-grid line {
+  stroke: var(--grid);
+  stroke-width: 1;
+}
+
+.chart-axis line {
+  stroke: var(--grid-strong);
+  stroke-width: 1.5;
+}
+
+.chart-axis text {
+  fill: var(--muted);
+  font-size: 14px;
+}
+
+.bar {
+  fill: var(--bars);
+  transition: fill 120ms;
+}
+
+.bar.is-hover {
+  fill: var(--bars-hover);
+}
+
+.bar-hit {
+  fill: transparent;
+}
+
+.is-draggable .bar-hit {
+  pointer-events: none;
+}
+
+.curve-line {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.series-user .curve-line {
+  stroke: var(--tabby);
+}
+
+.series-user .curve-area {
+  fill: var(--tabby);
+  fill-opacity: 0.12;
+}
+
+.series-target .curve-line {
+  stroke: var(--pen);
+}
+
+.vline line {
+  stroke-width: 2.5;
+}
+
+.vline.series-user line {
+  stroke: var(--tabby);
+  stroke-width: 3.5;
+}
+
+.vline.series-target line {
+  stroke: var(--pen);
+}
+
+.vline.series-ink line {
+  stroke: var(--ink-2);
+  stroke-dasharray: 6 5;
+}
+
+.vline-label {
+  fill: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+
+.handle-knob {
+  fill: var(--tabby);
+  stroke: var(--surface);
+  stroke-width: 3;
+}
+
+.drag-handle {
+  outline: none;
+}
+
+.drag-handle:focus-visible .handle-knob {
+  stroke: var(--pen);
+  stroke-width: 4;
+}
+
+.drag-capture {
+  fill: transparent;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.stems line {
+  stroke: var(--tabby);
+  stroke-width: 2.5;
+}
+
+.stems circle {
+  fill: var(--tabby);
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+
+.mass-bars path {
+  fill: var(--pen);
+  fill-opacity: 0.28;
+}
+
+.key-bars-target line {
+  stroke: var(--pen);
+  stroke-opacity: 0.4;
+  stroke-width: 9;
+  stroke-linecap: butt;
+}
+
+.key-user circle {
+  fill: var(--tabby);
+}
+
+.pmf-dot {
+  fill: var(--pen);
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+
+.tooltip rect {
+  fill: var(--ink);
+}
+
+.tooltip text {
+  fill: var(--surface);
+  font-size: 13px;
+}
+
+.tooltip .tooltip-title {
+  font-weight: 700;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin: 6px 4px 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ink-2);
+  font-size: 0.9rem;
+}
+
+.legend li {
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend line {
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.key-user line {
+  stroke: var(--tabby);
+}
+
+.key-target line {
+  stroke: var(--pen);
+}
+
+.key-target circle {
+  fill: var(--pen);
+}
+
+.key-ink line {
+  stroke: var(--ink-2);
+}
+
+.key-bars line {
+  stroke: var(--bars);
+  stroke-width: 9;
+  stroke-linecap: butt;
+}
+
+/* ------------------------------------------------------------------
+   Mascot
+   ------------------------------------------------------------------ */
+.cat-fur {
+  fill: var(--cat-fur);
+}
+
+.cat-ear {
+  fill: var(--cat-ear);
+}
+
+.cat-muzzle {
+  fill: var(--cat-muzzle);
+}
+
+.cat-stripe {
+  fill: none;
+  stroke: var(--cat-stripe);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.cat-stripe.thin {
+  stroke-width: 2.5;
+}
+
+.cat-eye {
+  fill: var(--cat-ink);
+}
+
+.cat-glint {
+  fill: #fff;
+}
+
+.cat-nose,
+.cat-tongue {
+  fill: var(--cat-nose);
+}
+
+.cat-line {
+  fill: none;
+  stroke: var(--cat-ink);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cat-line.thick {
+  stroke-width: 4.5;
+}
+
+.cat-whisker {
+  stroke: var(--cat-ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+
+/* On dark paper the bright fills need dark text to stay readable. */
+[data-theme="dark"] .button.primary:not(:disabled),
+[data-theme="dark"] .is-right .button.primary,
+[data-theme="dark"] .is-wrong .button.primary {
+  color: #131b2c;
+}
+
+/* Theme and language changes cross-fade the page (View Transitions API). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 260ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}

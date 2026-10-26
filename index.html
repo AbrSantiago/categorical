@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Aprendé estadística jugando: reconocé distribuciones, estimá la media y ajustá parámetros con feedback al instante." />
+    <meta name="theme-color" content="#F6F8FC" />
+    <title>Categorical</title>
+    <script>
+      // Apply the saved theme and language before the first paint (no flash).
+      // Keep the key in sync with SETTINGS_KEY in src/settings/model.ts.
+      (function () {
+        var s = {};
+        try { s = JSON.parse(localStorage.getItem("categorical.settings.v1")) || {}; } catch (e) {}
+        var pref = s.theme || "system";
+        var dark = pref === "dark" || (pref === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+        if (s.locale) document.documentElement.lang = s.locale;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
