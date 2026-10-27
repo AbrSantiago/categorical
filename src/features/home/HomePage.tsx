@@ -1,29 +1,27 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { isUnlocked, lessons, lessonSummaryId, lessonTitleId } from "../../content/lessons";
+import { lessons, lessonTitleId, recommendedLesson } from "../../content/lessons";
 import { currentStreak, dayKey } from "../../progress/model";
 import { useProgress } from "../../progress/ProgressContext";
 import { useI18n } from "../../settings/SettingsContext";
 import { SettingsMenu } from "../../settings/SettingsMenu";
-import { RichText } from "../../ui/Math";
 import { HeroCat } from "./HeroCat";
-import { LessonGlyph } from "./LessonGlyph";
+import { SkillTree } from "./SkillTree";
 
 export function HomePage() {
   const { progress } = useProgress();
   const { t } = useI18n();
   const [today] = useState(() => dayKey(new Date()));
-  const done = (id: string) => Boolean(progress?.lessons[id]);
-  const nextIndex = lessons.findIndex((l) => !done(l.id));
-  const next = lessons[nextIndex === -1 ? lessons.length - 1 : nextIndex];
+  const completed = Object.keys(progress?.lessons ?? {}).length;
+  const allDone = completed >= lessons.length;
+  const next = recommendedLesson((id) => Boolean(progress?.lessons[id]));
   const nextTitle = t(lessonTitleId(next));
   const streak = progress ? currentStreak(progress, today) : 0;
-  const cta =
-    nextIndex === 0
+  const cta = allDone
+    ? t("home.cta.review")
+    : completed === 0
       ? t("home.cta.start", { lesson: nextTitle })
-      : nextIndex === -1
-        ? t("home.cta.review")
-        : t("home.cta.continue", { lesson: nextTitle });
+      : t("home.cta.continue", { lesson: nextTitle });
 
   return (
     <div className="home">
@@ -59,55 +57,13 @@ export function HomePage() {
         <div className="hero-copy">
           <h1>{t("home.hero.title")}</h1>
           <p>{t("home.hero.body")}</p>
-          <Link to={`/lesson/${next.id}`} className="button primary">
+          <Link to={`/lesson/${allDone ? "repaso" : next.id}`} className="button primary">
             {cta}
           </Link>
         </div>
       </section>
 
-      <section className="path" aria-labelledby="path-title">
-        <h2 id="path-title">{t("home.path")}</h2>
-        <ol>
-          {lessons.map((lesson, i) => {
-            const record = progress?.lessons[lesson.id];
-            const unlocked = isUnlocked(i, done);
-            const status = record ? "done" : unlocked ? "open" : "locked";
-            const body = (
-              <>
-                <span className="node" aria-hidden="true">
-                  <LessonGlyph glyph={lesson.glyph} />
-                </span>
-                <span className="path-text">
-                  <span className="path-title">{t(lessonTitleId(lesson))}</span>
-                  <span className="path-summary">
-                    <RichText text={t(lessonSummaryId(lesson))} />
-                  </span>
-                  <span className="path-status">
-                    {record
-                      ? t("home.lesson.done", { pct: Math.round(record.bestScore * 100) })
-                      : unlocked
-                        ? t("home.lesson.count", { n: lesson.steps.length })
-                        : t("home.lesson.locked", { lesson: t(lessonTitleId(lessons[i - 1])) })}
-                  </span>
-                </span>
-              </>
-            );
-            return (
-              <li key={lesson.id} className={`path-item is-${status}`}>
-                {unlocked ? (
-                  <Link to={`/lesson/${lesson.id}`} className="path-link">
-                    {body}
-                  </Link>
-                ) : (
-                  <div className="path-link" aria-disabled="true">
-                    {body}
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ol>
-      </section>
+      <SkillTree progress={progress} />
     </div>
   );
 }

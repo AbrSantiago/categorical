@@ -512,63 +512,273 @@ a {
   }
 }
 
-.path {
-  padding-bottom: 56px;
+/* ------------------------------------------------------------------
+   Lesson map: every lesson, sized by distance to the focus
+   ------------------------------------------------------------------ */
+.tree {
+  padding-bottom: 24px;
 }
 
-.path h2 {
-  font-size: 1.5rem;
-  margin-bottom: 16px;
-}
-
-.path ol {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  position: relative;
-}
-
-/* The connecting line: lessons are a sequence. */
-.path ol::before {
-  content: "";
-  position: absolute;
-  left: 31px;
-  top: 32px;
-  bottom: 32px;
-  width: 3px;
-  border-radius: 2px;
-  background: var(--grid-strong);
-}
-
-.path-item + .path-item {
-  margin-top: 12px;
-}
-
-.path-link {
-  position: relative;
+.tree-head {
   display: flex;
-  gap: 16px;
-  align-items: center;
-  padding: 10px 12px 10px 0;
-  text-decoration: none;
-  border-radius: var(--radius-m);
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-bottom: 4px;
 }
 
-a.path-link:hover .path-title {
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 3px;
+.tree-head h2 {
+  font-size: 1.5rem;
 }
 
-.node {
+.tree-count {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.map {
+  position: relative;
+  margin: 0 -4px;
+}
+
+.map-edges {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.map-edge {
+  fill: none;
+  stroke: var(--grid-strong);
+  stroke-width: 1.5;
+  opacity: 0.7;
+  transition: stroke 200ms, opacity 200ms;
+}
+
+.map-edge.is-locked {
+  stroke-dasharray: 4 4;
+}
+
+.map-edge.is-lineage {
+  stroke: var(--ink-2);
+  stroke-width: 2.5;
+  opacity: 1;
+}
+
+.map-node {
+  position: absolute;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  transform: translate(-50%, 0);
+  cursor: pointer;
+}
+
+/* The bubble is centered on the row line; the label hangs below it. */
+.map-node .map-bubble {
+  translate: 0 -50%;
+}
+
+.map-bubble {
+  position: relative;
   display: grid;
   place-items: center;
   flex: none;
-  width: 64px;
-  height: 64px;
   border-radius: 50%;
   background: var(--surface);
   border: 3px solid var(--grid-strong);
+  transition: width 260ms cubic-bezier(0.3, 1.3, 0.5, 1), height 260ms cubic-bezier(0.3, 1.3, 0.5, 1);
+}
+
+.map-bubble .glyph {
+  width: 62%;
+  height: 62%;
+}
+
+.is-open .map-bubble,
+.map-bubble.is-open {
+  border-color: var(--tabby);
+}
+
+.is-done .map-bubble,
+.map-bubble.is-done {
+  border-color: var(--good);
+  background: var(--good-bg);
+}
+
+.is-locked .map-bubble,
+.map-bubble.is-locked {
+  border-color: var(--grid-strong);
+  background: var(--paper);
+}
+
+.is-locked .glyph {
+  opacity: 0.45;
+}
+
+.dist-3 .map-bubble {
+  border-width: 2px;
+}
+
+.dist-3.is-open .map-bubble {
+  background: var(--tabby);
+}
+
+.dist-3.is-done .map-bubble {
+  background: var(--good);
+}
+
+.map-node.is-focus .map-bubble {
+  border-width: 4px;
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--tabby) 22%, transparent);
+}
+
+.map-node.is-focus.is-done .map-bubble {
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--good) 22%, transparent);
+}
+
+.map-node:hover .map-bubble {
+  border-color: var(--ink-2);
+}
+
+.map-node:focus-visible {
+  outline: none;
+}
+
+.map-node:focus-visible .map-bubble {
+  outline: 3px solid var(--pen);
+  outline-offset: 3px;
+}
+
+.map-label {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 100%;
+  /* Opaque pill so edges pass under the name instead of through it. */
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: var(--paper);
+  font: 700 0.78rem/1.2 var(--font-body);
+  text-align: center;
+  transform: translateY(-14px);
+}
+
+.dist-0 .map-label {
+  color: var(--ink);
+  font-size: 0.9rem;
+  transform: translateY(-26px);
+}
+
+.dist-1 .map-label {
+  transform: translateY(-18px);
+}
+
+.dist-2 .map-label {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--muted);
+  transform: translateY(-12px);
+}
+
+/* Details of the focused lesson; sticks to the bottom while the map is on screen. */
+.focus-panel {
+  position: sticky;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 5;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 14px;
+  margin-top: 8px;
+  padding: 14px 16px;
+  border-radius: var(--radius-l);
+  background: var(--surface);
+  border: 2px solid var(--grid-strong);
+  box-shadow: 0 10px 28px rgb(15 25 50 / 0.16);
+}
+
+.focus-panel.is-open {
+  border-color: var(--tabby);
+}
+
+.focus-panel.is-done {
+  border-color: var(--good);
+}
+
+.focus-panel > .map-bubble {
+  width: 52px;
+  height: 52px;
+}
+
+.focus-panel-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.focus-panel h3 {
+  font-size: 1.15rem;
+}
+
+.focus-panel-summary {
+  color: var(--ink-2);
+  font-size: 0.92rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.focus-panel-meta {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.focus-panel .button {
+  grid-column: 1 / -1;
+  min-height: 46px;
+  margin-top: 8px;
+}
+
+@media (min-width: 640px) {
+  .focus-panel {
+    grid-template-columns: auto 1fr auto;
+  }
+  .focus-panel .button {
+    grid-column: auto;
+    margin-top: 0;
+  }
+}
+
+.node-check {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--good);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.node-small .node-check {
+  width: 14px;
+  height: 14px;
+  right: -3px;
+  bottom: -3px;
+  font-size: 0.55rem;
 }
 
 .is-open .node {
@@ -579,10 +789,6 @@ a.path-link:hover .path-title {
 .is-done .node {
   border-color: var(--good);
   background: var(--good-bg);
-}
-
-.is-locked .path-text {
-  opacity: 0.6;
 }
 
 .is-locked .node {
@@ -647,24 +853,6 @@ a.path-link:hover .path-title {
 .is-open .glyph rect,
 .is-open .glyph circle {
   fill: var(--tabby-strong);
-}
-
-.path-text {
-  display: grid;
-  gap: 2px;
-}
-
-.path-title {
-  font: 700 1.2rem/1.2 var(--font-display);
-}
-
-.path-summary {
-  color: var(--ink-2);
-}
-
-.path-status {
-  color: var(--muted);
-  font-size: 0.9rem;
 }
 
 /* ------------------------------------------------------------------

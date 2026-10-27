@@ -25,7 +25,7 @@ Other scripts:
 
 ## What's in it
 
-A path of 13 lessons, each unlocking the next:
+13 lessons on a map. Each lesson lists the lessons it requires (`requires` in `src/content/lessons.ts`), so they form a graph with several branches instead of a single line; a lesson unlocks when all its requirements are done. The home screen draws the whole map with its edges: rows by depth, a fixed place per lesson (`src/features/home/mapLayout.ts`), and node sizes that shrink with the distance to the lesson in focus, down to unlabeled dots. Edges through the focus are highlighted, and edges that skip a row detour around the lessons in between. The focused lesson's details and start button sit in a panel that sticks to the bottom of the screen. The focus lives in the URL (`?focus=…`), so the back button returns to the previous one.
 
 - **Shapes 1–4 and the shapes exam**: name the distribution behind a histogram. 24 distributions, from the normal to the Gumbel. Wrong options never come from the same look-alike group as the answer (a gamma and a chi-square can't be told apart by eye), so every question is fair.
 - **The normal** and **The center**: fit μ and σ with sliders; drag a line to the mean or median.

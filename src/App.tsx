@@ -1,3 +1,4 @@
+import { MotionConfig } from "motion/react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import type { Catalog, Locale } from "./core/i18n";
 import { HomePage } from "./features/home/HomePage";
@@ -13,6 +14,8 @@ interface AppProps {
 
 export function App({ progressRepository, catalogs }: AppProps) {
   return (
+    // reducedMotion="user": layout and transform animations turn off for people who ask for less motion.
+    <MotionConfig reducedMotion="user">
     <SettingsProvider catalogs={catalogs}>
       <ProgressProvider repository={progressRepository}>
         <BrowserRouter>
@@ -24,5 +27,6 @@ export function App({ progressRepository, catalogs }: AppProps) {
         </BrowserRouter>
       </ProgressProvider>
     </SettingsProvider>
+    </MotionConfig>
   );
 }
