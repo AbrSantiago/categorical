@@ -6,9 +6,9 @@ export interface LessonStep {
   config?: ExerciseConfig;
 }
 
-/** Subjects with their own map. Lessons never require lessons of another area. */
-export type AreaId = "stats" | "functions";
-export const AREAS: AreaId[] = ["stats", "functions"];
+/** Subjects with their own map. Lessons never require lessons of another course. */
+export type CourseId = "stats" | "functions";
+export const COURSE_IDS: CourseId[] = ["stats", "functions"];
 
 export type Glyph =
   | "shapes"
@@ -34,7 +34,7 @@ export type Glyph =
 /** Titles and summaries live in messages.ts as `lesson.<id>.title` / `.summary`. */
 export interface Lesson {
   id: string;
-  area: AreaId;
+  course: CourseId;
   /** Lessons that must be finished first (derived from the course shape below). */
   requires: string[];
   /** Small shape drawn next to the lesson on the map. */
@@ -42,7 +42,7 @@ export interface Lesson {
   steps: LessonStep[];
 }
 
-type LessonDraft = Omit<Lesson, "area" | "requires">;
+type LessonDraft = Omit<Lesson, "course" | "requires">;
 
 /**
  * Every map has the same shape: one starting lesson that opens several
@@ -51,22 +51,26 @@ type LessonDraft = Omit<Lesson, "area" | "requires">;
  * draw each one in its own column with no crossing edges.
  */
 export interface Course {
-  area: AreaId;
+  id: CourseId;
   start: string;
   branches: string[][];
   finish: string[];
 }
 
-function course(area: AreaId, start: LessonDraft, branches: LessonDraft[][], finish: LessonDraft[]) {
-  const out: Lesson[] = [{ ...start, area, requires: [] }];
+/** More side-by-side branches than this won't fit a phone screen. */
+export const MAX_BRANCHES = 4;
+
+function defineCourse(course: CourseId, start: LessonDraft, branches: LessonDraft[][], finish: LessonDraft[]) {
+  if (branches.length > MAX_BRANCHES) throw new Error(`${course}: at most ${MAX_BRANCHES} branches`);
+  const out: Lesson[] = [{ ...start, course, requires: [] }];
   for (const branch of branches) {
-    branch.forEach((l, i) => out.push({ ...l, area, requires: [i === 0 ? start.id : branch[i - 1].id] }));
+    branch.forEach((l, i) => out.push({ ...l, course, requires: [i === 0 ? start.id : branch[i - 1].id] }));
   }
   finish.forEach((l, i) =>
-    out.push({ ...l, area, requires: i === 0 ? branches.map((b) => b[b.length - 1].id) : [finish[i - 1].id] }),
+    out.push({ ...l, course, requires: i === 0 ? branches.map((b) => b[b.length - 1].id) : [finish[i - 1].id] }),
   );
   const shape: Course = {
-    area,
+    id: course,
     start: start.id,
     branches: branches.map((b) => b.map((l) => l.id)),
     finish: finish.map((l) => l.id),
@@ -93,7 +97,7 @@ const PARAMS_BASIC = ["normal", "uniform", "exponential", "poisson"];
 const FIT_DISCRETE = ["poisson", "binomial", "geometric", "negative-binomial"];
 const FIT_SKEWED = ["gamma", "beta", "weibull", "lognormal", "chi-square", "rayleigh"];
 
-const stats = course(
+const stats = defineCourse(
   "stats",
   { id: "formas", glyph: "shapes", steps: repeat("guess-distribution", 1, 6, { pool: SHAPES_1 }) },
   [
@@ -198,7 +202,7 @@ const FAM_SHIFT = ["quadratic", "abs", "sqrt", "cubic", "rational", "exponential
 const FAM_RANGE = ["constant", "quadratic", "abs", "sqrt", "rational", "exponential", "cubic", "linear"];
 const FAM_DOMAIN = ["sqrt", "log", "rational", "quadratic", "exponential", "abs", "linear"];
 
-const functions = course(
+const functions = defineCourse(
   "functions",
   {
     id: "familias",
@@ -269,14 +273,14 @@ const functions = course(
  * the exercise itself is generated fresh every time.
  */
 export const lessons: Lesson[] = [...stats.lessons, ...functions.lessons];
-export const courses: Record<AreaId, Course> = { stats: stats.shape, functions: functions.shape };
+export const courses: Record<CourseId, Course> = { stats: stats.shape, functions: functions.shape };
 
 export function getLesson(id: string): Lesson | undefined {
   return lessons.find((l) => l.id === id);
 }
 
-export function lessonsOf(area: AreaId): Lesson[] {
-  return lessons.filter((l) => l.area === area);
+export function lessonsOf(course: CourseId): Lesson[] {
+  return lessons.filter((l) => l.course === course);
 }
 
 /** A lesson unlocks when every lesson it requires has been completed. */
@@ -293,20 +297,20 @@ export function parentsOf(id: string): Lesson[] {
   return getLesson(id)?.requires.map((r) => getLesson(r)!) ?? [];
 }
 
-/** The starting lesson of an area: the one that requires nothing. */
-export function rootOf(area: AreaId): Lesson {
-  return getLesson(courses[area].start)!;
+/** The starting lesson of a course: the one that requires nothing. */
+export function rootOf(course: CourseId): Lesson {
+  return getLesson(courses[course].start)!;
 }
 
-/** The last lesson of an area (its final review or exam). */
-export function lastOf(area: AreaId): Lesson {
-  const finish = courses[area].finish;
+/** The last lesson of a course (its final review or exam). */
+export function lastOf(course: CourseId): Lesson {
+  const finish = courses[course].finish;
   return getLesson(finish[finish.length - 1])!;
 }
 
-/** First lesson (in list order) of the area that is available and not done yet. */
-export function recommendedLesson(completed: (id: string) => boolean, area: AreaId): Lesson {
-  return lessonsOf(area).find((l) => !completed(l.id) && isUnlocked(l, completed)) ?? rootOf(area);
+/** First lesson (in list order) of the course that is available and not done yet. */
+export function recommendedLesson(completed: (id: string) => boolean, course: CourseId): Lesson {
+  return lessonsOf(course).find((l) => !completed(l.id) && isUnlocked(l, completed)) ?? rootOf(course);
 }
 
 /** How many distinct lessons lie somewhere beyond `id`. */

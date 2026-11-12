@@ -1,103 +1,65 @@
-import { motion } from "motion/react";
-import { useEffect, useState } from "react";
-import { Link, Navigate, useParams } from "react-router";
-import { AREAS, lastOf, lessonsOf, lessonTitleId, recommendedLesson, type AreaId } from "../../content/lessons";
-import { currentStreak, dayKey } from "../../progress/model";
+import { Link } from "react-router";
+import { COURSE_IDS, lessonsOf, lessonTitleId, recommendedLesson, type CourseId } from "../../content/lessons";
 import { useProgress } from "../../progress/ProgressContext";
 import { useI18n } from "../../settings/SettingsContext";
-import { SettingsMenu } from "../../settings/SettingsMenu";
-import { HeroCat } from "./HeroCat";
-import { AreaIcon } from "./AreaIcon";
-import { isArea, loadLastArea, saveLastArea } from "./lastArea";
-import { SkillTree } from "./SkillTree";
+import { CourseIcon } from "./CourseIcon";
+import { TopBar } from "./TopBar";
 
-/** "/" opens the area someone was last on. */
-export function LastAreaRedirect() {
-  return <Navigate to={`/${loadLastArea()}`} replace />;
-}
-
+/**
+ * The main menu: every course, with how far along you are. Courses are a
+ * list that can keep growing; each one opens its own lesson map.
+ */
 export function HomePage() {
-  const { area } = useParams();
-  if (!isArea(area)) return <Navigate to="/" replace />;
-  return <AreaHome area={area} />;
-}
-
-function AreaHome({ area }: { area: AreaId }) {
-  const { progress } = useProgress();
   const { t } = useI18n();
-  const [today] = useState(() => dayKey(new Date()));
-  useEffect(() => saveLastArea(area), [area]);
-  const own = lessonsOf(area);
-  const completed = own.filter((l) => progress?.lessons[l.id]).length;
-  const allDone = completed >= own.length;
-  const next = recommendedLesson((id) => Boolean(progress?.lessons[id]), area);
-  const nextTitle = t(lessonTitleId(next));
-  const streak = progress ? currentStreak(progress, today) : 0;
-  const cta = allDone
-    ? t("home.cta.review")
-    : completed === 0
-      ? t("home.cta.start", { lesson: nextTitle })
-      : t("home.cta.continue", { lesson: nextTitle });
-
   return (
     <div className="home">
-      <header className="topbar">
-        <span className="brand">Categorical</span>
-        <div className="topbar-end">
-          <div className="stats" aria-label={t("home.progress")}>
-            <span className="stat" title={t("home.streak.title")}>
-              <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" className="stat-icon streak">
-                <path d="M10 2 C11 6 15 7 15 12 A5 5 0 0 1 5 12 C5 9 7 8 7 5 C8 7 9 7 10 2 Z" />
-              </svg>
-              <span className="stat-full">{t("home.streak", { n: streak })}</span>
-              <span className="stat-short" aria-hidden="true">
-                {streak}
-              </span>
-            </span>
-            <span className="stat" title={t("home.xp.title")}>
-              <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" className="stat-icon xp">
-                <path d="M10 2 L12.4 7.2 L18 7.8 L13.8 11.6 L15 17.2 L10 14.4 L5 17.2 L6.2 11.6 L2 7.8 L7.6 7.2 Z" />
-              </svg>
-              <span className="stat-full">{progress?.xp ?? 0} XP</span>
-              <span className="stat-short" aria-hidden="true">
-                {progress?.xp ?? 0}
-              </span>
-            </span>
-          </div>
-          <SettingsMenu />
-        </div>
-      </header>
-
-      <AreaTabs current={area} />
-
-      <section className="hero">
-        <HeroCat key={area} area={area} />
-        <div className="hero-copy">
-          <h1>{t(`home.hero.${area}.title`)}</h1>
-          <p>{t(`home.hero.${area}.body`)}</p>
-          <Link to={`/lesson/${allDone ? lastOf(area).id : next.id}`} className="button primary">
-            {cta}
-          </Link>
-        </div>
+      <TopBar />
+      <section className="menu-head">
+        <h1>{t("menu.title")}</h1>
+        <p>{t("menu.lead")}</p>
       </section>
-
-      <SkillTree progress={progress} area={area} />
+      <ul className="course-list">
+        {COURSE_IDS.map((id) => (
+          <li key={id}>
+            <CourseCard course={id} />
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-/** Switch between subjects; each one has its own map. */
-function AreaTabs({ current }: { current: AreaId }) {
+function CourseCard({ course }: { course: CourseId }) {
   const { t } = useI18n();
+  const { progress } = useProgress();
+  const done = (id: string) => Boolean(progress?.lessons[id]);
+  const own = lessonsOf(course);
+  const completed = own.filter((l) => done(l.id)).length;
+  const status =
+    completed === 0
+      ? t("menu.new")
+      : completed === own.length
+        ? t("menu.finished")
+        : t("menu.next", { lesson: t(lessonTitleId(recommendedLesson(done, course))) });
   return (
-    <nav className="area-tabs" aria-label={t("home.areas")}>
-      {AREAS.map((a) => (
-        <Link key={a} to={`/${a}`} className={`area-tab${a === current ? " is-current" : ""}`} aria-current={a === current ? "page" : undefined}>
-          {a === current && <motion.span layoutId="area-thumb" className="area-thumb" transition={{ type: "spring", stiffness: 500, damping: 38 }} />}
-          <AreaIcon area={a} />
-          <span>{t(`home.area.${a}`)}</span>
-        </Link>
-      ))}
-    </nav>
+    <Link to={`/course/${course}`} className={`course-card is-${course}`}>
+      <span className="course-art">
+        <CourseIcon course={course} />
+      </span>
+      <span className="course-text">
+        <span className="course-title">{t(`course.${course}.title`)}</span>
+        <span className="course-tagline">{t(`course.${course}.tagline`)}</span>
+        <span className="course-progress">
+          <span className="course-bar" aria-hidden="true">
+            <span style={{ width: `${(100 * completed) / own.length}%` }} />
+          </span>
+          <span>{t("menu.progress", { done: completed, total: own.length })}</span>
+        </span>
+        <span className="course-status">{status}</span>
+      </span>
+      <svg className="course-go" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
+        <path d="M7.5 4 L13.5 10 L7.5 16" />
+      </svg>
+    </Link>
   );
 }

@@ -45,7 +45,7 @@ export function LessonSummary({ lesson, result, streak, onRestart }: Props) {
         </div>
       </dl>
       <div className="summary-actions">
-        <Link to={`/${lesson.area}?focus=${lesson.id}`} className="button primary">
+        <Link to={`/course/${lesson.course}?focus=${lesson.id}`} className="button primary">
           {t("summary.home")}
         </Link>
         {onRestart && (

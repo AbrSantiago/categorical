@@ -277,6 +277,18 @@ a {
 .settings-button svg {
   width: 20px;
   height: 20px;
+  transition: transform 360ms cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+
+/* The gear turns a little while the panel is open. */
+.settings-button[aria-expanded="true"] svg {
+  transform: rotate(45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-button svg {
+    transition: none;
+  }
 }
 
 .settings-button svg circle,
@@ -435,78 +447,180 @@ a {
   stroke-linejoin: round;
 }
 
-/* Subject switcher under the top bar: one map per subject. */
-.area-tabs {
-  display: flex;
-  gap: 4px;
-  width: fit-content;
-  max-width: 100%;
-  margin-top: 14px;
-  padding: 4px;
-  border-radius: 14px;
-  background: var(--surface);
-  border: 1px solid var(--grid);
-}
-
-.area-tab {
-  position: relative;
+/* Back to the course list (left of the top bar on a course page). */
+.back-link {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
+  gap: 4px;
+  margin-left: -6px;
+  padding: 6px 10px 6px 4px;
   border-radius: 10px;
-  color: var(--ink-2);
-  font-weight: 700;
+  color: var(--ink);
+  font: 700 1.05rem/1 var(--font-display);
   text-decoration: none;
-  transition: color 160ms ease;
 }
 
-.area-tab:hover {
-  color: var(--ink);
+.back-link svg path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.area-tab > :not(.area-thumb) {
-  position: relative; /* above the thumb */
-  z-index: 1;
+.back-link:hover {
+  background: var(--surface);
 }
 
-.area-tab.is-current {
-  color: var(--ink);
-}
-
-.area-thumb {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: var(--pen-soft);
-  box-shadow: inset 0 0 0 1px var(--grid-strong);
-}
-
-.area-tab:focus-visible {
+.back-link:focus-visible {
   outline: 3px solid var(--pen);
-  outline-offset: 1px;
 }
 
-.area-icon rect {
+/* Main menu: the list of courses. */
+.menu-head {
+  padding: 18px 0 14px;
+}
+
+.menu-head h1 {
+  font: 800 clamp(2rem, 7vw, 2.8rem) / 1.05 var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+.menu-head p {
+  margin-top: 8px;
+  color: var(--ink-2);
+}
+
+.course-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 14px;
+  padding: 0 0 32px;
+  list-style: none;
+}
+
+.course-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  height: 100%;
+  padding: 16px;
+  border-radius: var(--radius-l);
+  background: var(--surface);
+  border: 2px solid var(--grid);
+  border-bottom-width: 5px;
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color 160ms, transform 160ms;
+}
+
+.course-card:hover {
+  border-color: var(--tabby);
+}
+
+.course-card:active {
+  transform: translateY(2px);
+}
+
+.course-card:focus-visible {
+  outline: 3px solid var(--pen);
+  outline-offset: 2px;
+}
+
+.course-art {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: var(--tabby-soft, color-mix(in srgb, var(--tabby) 16%, transparent));
+  color: var(--tabby-strong);
+}
+
+.course-icon {
+  width: 34px;
+  height: 34px;
+}
+
+.course-icon rect {
   fill: currentColor;
 }
 
-.area-icon-axis {
+.course-icon-axis {
   fill: none;
   stroke: currentColor;
   stroke-width: 1.4;
   opacity: 0.55;
 }
 
-.area-icon-curve {
+.course-icon-curve {
   fill: none;
   stroke: currentColor;
   stroke-width: 2.2;
   stroke-linecap: round;
 }
 
-.area-tab.is-current .area-icon {
-  color: var(--tabby);
+.course-text {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.course-title {
+  font: 800 1.3rem/1.1 var(--font-display);
+}
+
+.course-tagline {
+  color: var(--ink-2);
+  font-size: 0.92rem;
+}
+
+.course-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.course-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--grid);
+  overflow: hidden;
+}
+
+.course-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--good);
+}
+
+.course-status {
+  color: var(--ink-2);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.course-go path {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hero-copy .hero-kicker {
+  color: var(--tabby-strong);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
 }
 
 .hero {
@@ -624,7 +738,9 @@ a {
 
 .map {
   position: relative;
-  margin: 0 -4px;
+  /* Belt and braces: nothing on the map may cause sideways scrolling. */
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
 .map-edges {
@@ -707,18 +823,6 @@ a {
   opacity: 0.45;
 }
 
-.dist-3 .map-bubble {
-  border-width: 2px;
-}
-
-.dist-3.is-open .map-bubble {
-  background: var(--tabby);
-}
-
-.dist-3.is-done .map-bubble {
-  background: var(--good);
-}
-
 .map-node.is-focus .map-bubble {
   border-width: 4px;
   box-shadow: 0 0 0 5px color-mix(in srgb, var(--tabby) 22%, transparent);
@@ -743,7 +847,7 @@ a {
 
 .map-label {
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   max-width: 100%;
@@ -753,24 +857,15 @@ a {
   background: var(--paper);
   font: 700 0.78rem/1.2 var(--font-body);
   text-align: center;
-  transform: translateY(-14px);
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  /* The bubble is pulled up by half its size; pull the name up after it. */
+  margin-top: calc(var(--size, 50px) / -2 + 2px);
 }
 
-.dist-0 .map-label {
+.map-node.is-focus .map-label {
   color: var(--ink);
-  font-size: 0.9rem;
-  transform: translateY(-26px);
-}
-
-.dist-1 .map-label {
-  transform: translateY(-18px);
-}
-
-.dist-2 .map-label {
-  font-size: 0.7rem;
-  font-weight: 400;
-  color: var(--muted);
-  transform: translateY(-12px);
+  font-size: 0.86rem;
 }
 
 /* Details of the focused lesson; sticks to the bottom while the map is on screen. */
@@ -1058,6 +1153,7 @@ a {
 .feedback-text {
   display: grid;
   gap: 6px;
+  min-width: 0; /* a flex child; without this, one long formula widens the page */
   max-width: 62ch;
 }
 
@@ -2282,4 +2378,45 @@ line.fn-guides.is-user {
 
 .nowrap {
   white-space: nowrap;
+}
+
+/* Exercises slide in sideways; that must never make the page scroll sideways. */
+.lesson-body {
+  overflow-x: clip;
+  overflow-clip-margin: 6px;
+}
+
+.tex.is-long {
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  vertical-align: bottom;
+  padding-bottom: 2px;
+}
+
+/* Two machines in a row must fit a 320px phone. */
+.machines {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 400px) {
+  .machines {
+    gap: 2px;
+    padding: 14px 4px;
+    font-size: 0.92rem;
+  }
+  .machine {
+    min-width: 0;
+    padding: 4px 6px 6px;
+  }
+  .machine-arrow {
+    width: 8px;
+  }
+  .machine-value {
+    font-size: 1.1rem;
+  }
+  .machine-symbolic {
+    font-size: 0.8rem;
+  }
 }

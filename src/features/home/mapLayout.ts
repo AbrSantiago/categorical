@@ -1,8 +1,8 @@
-import { childrenOf, courses, getLesson, type AreaId, type Lesson } from "../../content/lessons";
+import { childrenOf, courses, getLesson, type CourseId, type Lesson } from "../../content/lessons";
 
 /**
- * Layout of an area's lesson map, independent of the focus, so nodes never
- * jump around: only their size changes with the distance to the focus.
+ * Layout of a course's lesson map, independent of the focus, so nodes never
+ * jump around: only the focused one grows.
  *
  * Courses have a fixed shape (start → parallel branches → shared finish), so
  * the layout is fixed too: the start on top, each branch in its own column,
@@ -26,8 +26,8 @@ export interface MapLayout {
   edges: [string, string][];
 }
 
-export function layoutMap(area: AreaId): MapLayout {
-  const { start, branches, finish } = courses[area];
+export function layoutMap(course: CourseId): MapLayout {
+  const { start, branches, finish } = courses[course];
   const columns = branches.length;
   const longest = Math.max(...branches.map((b) => b.length));
   const node = (id: string, row: number, column: number | null): MapNode => ({
@@ -43,23 +43,6 @@ export function layoutMap(area: AreaId): MapLayout {
   ];
   const edges: [string, string][] = nodes.flatMap((n) => n.lesson.requires.map((r) => [r, n.lesson.id] as [string, string]));
   return { nodes, rows: 1 + longest + finish.length, columns, edges };
-}
-
-/** Steps between `from` and every connected lesson, ignoring edge direction. */
-export function distancesFrom(from: string): Map<string, number> {
-  const neighbors = (id: string) => [...(getLesson(id)?.requires ?? []), ...childrenOf(id).map((c) => c.id)];
-  const dist = new Map([[from, 0]]);
-  const queue = [from];
-  while (queue.length) {
-    const current = queue.shift()!;
-    for (const n of neighbors(current)) {
-      if (!dist.has(n)) {
-        dist.set(n, dist.get(current)! + 1);
-        queue.push(n);
-      }
-    }
-  }
-  return dist;
 }
 
 /** Every lesson `id` depends on, directly or not. */

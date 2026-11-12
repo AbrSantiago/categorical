@@ -26,7 +26,16 @@ export function createLocalProgressRepository(
       const raw = storage.getItem(STORAGE_KEY);
       if (!raw) return emptyProgress();
       const parsed = JSON.parse(raw) as Progress;
-      return parsed.version === 1 ? parsed : emptyProgress();
+      // Anything that doesn't look like progress (edited by hand, another
+      // version) starts over instead of breaking the app.
+      const valid =
+        parsed?.version === 1 &&
+        typeof parsed.xp === "number" &&
+        typeof parsed.streak === "object" &&
+        parsed.streak !== null &&
+        typeof parsed.lessons === "object" &&
+        parsed.lessons !== null;
+      return valid ? parsed : emptyProgress();
     } catch {
       return emptyProgress();
     }

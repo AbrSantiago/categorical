@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { exerciseTypes } from "../exercises/registry";
 import {
-  AREAS,
+  COURSE_IDS,
   childrenOf,
   courses,
   descendantCount,
@@ -16,20 +16,20 @@ import {
 } from "./lessons";
 
 describe("lesson graph", () => {
-  it("has unique ids and only requires lessons of the same area", () => {
+  it("has unique ids and only requires lessons of the same course", () => {
     expect(new Set(lessons.map((l) => l.id)).size).toBe(lessons.length);
     for (const l of lessons)
       for (const r of l.requires) {
         expect(getLesson(r), `${l.id} → ${r}`).toBeDefined();
-        expect(getLesson(r)!.area, `${l.id} → ${r}`).toBe(l.area);
+        expect(getLesson(r)!.course, `${l.id} → ${r}`).toBe(l.course);
       }
   });
 
-  for (const area of AREAS) {
-    describe(area, () => {
-      const own = lessonsOf(area);
-      const root = rootOf(area);
-      const join = getLesson(courses[area].finish[0])!;
+  for (const course of COURSE_IDS) {
+    describe(course, () => {
+      const own = lessonsOf(course);
+      const root = rootOf(course);
+      const join = getLesson(courses[course].finish[0])!;
 
       it("has exactly one starting lesson", () => {
         expect(own.filter((l) => l.requires.length === 0).map((l) => l.id)).toEqual([root.id]);
@@ -49,7 +49,7 @@ describe("lesson graph", () => {
         expect(reached.size).toBe(own.length);
         for (const l of own) expect(trailTo(l.id)[0].id).toBe(root.id);
         expect(descendantCount(root.id)).toBe(own.length - 1);
-        expect(descendantCount(lastOf(area).id)).toBe(0);
+        expect(descendantCount(lastOf(course).id)).toBe(0);
       });
 
       // The map stays readable only if branches never meet in the middle:
@@ -61,9 +61,9 @@ describe("lesson graph", () => {
             continue;
           }
           if (l.id !== join.id) expect(parentsOf(l.id).length, `${l.id} parents`).toBe(1);
-          if (l.id !== lastOf(area).id) expect(childrenOf(l.id).length, `${l.id} children`).toBe(1);
+          if (l.id !== lastOf(course).id) expect(childrenOf(l.id).length, `${l.id} children`).toBe(1);
         }
-        expect(parentsOf(join.id).length).toBe(courses[area].branches.length);
+        expect(parentsOf(join.id).length).toBe(courses[course].branches.length);
       });
     });
   }

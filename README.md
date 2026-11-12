@@ -1,6 +1,6 @@
 # categorical
 
-Interactive Duolingo-style web app to learn math through play, with instant feedback. Two subjects so far:
+Interactive Duolingo-style web app to learn math through play, with instant feedback. Two courses so far:
 
 - **Statistics**: guess distributions from histograms, drag means, tweak parameters with sliders.
 - **Functions** (first-year calculus): recognize families, pick graphs, squash a graph onto an axis to see its domain and range, mirror it across y = x to get the inverse, chain functions as machines. Tapping and dragging instead of algebra.
@@ -28,7 +28,7 @@ Other scripts:
 
 ## What's in it
 
-Each subject has its own map (`/stats`, `/functions`; `/` opens the last one). A map always has the same shape: one starting lesson that opens several themed branches, each branch a straight chain, and every branch ending in the same closing lessons. The shape is data (`course(...)` in `src/content/lessons.ts`) and `requires` is derived from it, so branches can't cross; a test fails if a lesson in the middle ever gets a second parent or child. The home screen draws the map with each branch in its own column (`src/features/home/mapLayout.ts`), node sizes that shrink with the distance to the lesson in focus, and the focus's lineage highlighted. The focused lesson's details and start button sit in a panel that sticks to the bottom of the screen. The focus lives in the URL (`?focus=…`).
+The home screen is the course list (`/`), with each course's progress; a course (`/course/stats`, `/course/functions`) has its own lesson map. A map always has the same shape: one starting lesson that opens up to four themed branches, each branch a straight chain, and every branch ending in the same closing lessons. The shape is data (`defineCourse(...)` in `src/content/lessons.ts`) and `requires` is derived from it, so branches can't cross; a test fails if a lesson in the middle ever gets a second parent or child, or a course gets more than four branches. The map draws each branch in its own column (`src/features/home/mapLayout.ts`), every lesson the same size and named, the focused one bigger with its lineage highlighted, and never needs horizontal scrolling: it only grows downwards. The focused lesson's details and start button sit in a panel that sticks to the bottom of the screen. The focus lives in the URL (`?focus=…`).
 
 **Statistics** (14 lessons): Shapes → four branches (the normal; discrete; skewed; tails and peaks) → Shapes exam → Mixed review.
 
@@ -64,7 +64,7 @@ src/
       FitNormalView.tsx
       index.ts       logic + prompt + view = an ExerciseType
   content/       lessons as data (which exercise types, at which difficulty)
-  features/      screens: home (subject tabs and map) and lesson (player, session state machine, summary)
+  features/      screens: home (course list, course map) and lesson (player, session state machine, summary)
   i18n/          app texts + the catalog that merges every messages.ts
   progress/      progress model + ProgressRepository interface (localStorage today)
   settings/      language and theme (per device, localStorage)

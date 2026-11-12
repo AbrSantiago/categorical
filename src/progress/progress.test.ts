@@ -46,5 +46,9 @@ describe("local repository", () => {
 
     data.set([...data.keys()][0], "{not json");
     expect((await repo.load()).xp).toBe(0);
+
+    // Valid JSON with the wrong shape starts over too, instead of crashing the app.
+    data.set([...data.keys()][0], JSON.stringify({ version: 1, xp: 120, lessons: {} }));
+    expect(await repo.load()).toEqual(emptyProgress());
   });
 });

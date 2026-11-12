@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Link, useSearchParams } from "react-router";
 import {
   getLesson,
@@ -7,32 +7,35 @@ import {
   lessonSummaryId,
   lessonTitleId,
   recommendedLesson,
-  type AreaId,
+  type CourseId,
   type Lesson,
 } from "../../content/lessons";
 import type { Progress } from "../../progress/model";
 import { useI18n } from "../../settings/SettingsContext";
 import { RichText } from "../../ui/Math";
 import { LessonGlyph } from "./LessonGlyph";
-import { ancestorsOf, descendantsOf, distancesFrom, layoutMap, type MapLayout } from "./mapLayout";
+import { ancestorsOf, descendantsOf, layoutMap, type MapLayout } from "./mapLayout";
 
 type Status = "done" | "open" | "locked";
 
-/** Node size by steps from the focus: the further away, the smaller. */
-const SIZES = [76, 54, 38, 18];
-const ROW_HEIGHT = 118;
-const TOP = 46;
+/** Every lesson has the same size except the focused one. */
+const NODE = 50;
+const FOCUS = 74;
+/** Room for a focused bubble plus a three-line name below it. */
+const ROW_HEIGHT = 134;
+const TOP = FOCUS / 2 + 6;
 
-const LAYOUTS = new Map<AreaId, MapLayout>();
-const layoutOf = (area: AreaId) => {
-  if (!LAYOUTS.has(area)) LAYOUTS.set(area, layoutMap(area));
-  return LAYOUTS.get(area)!;
+const LAYOUTS = new Map<CourseId, MapLayout>();
+const layoutOf = (course: CourseId) => {
+  if (!LAYOUTS.has(course)) LAYOUTS.set(course, layoutMap(course));
+  return LAYOUTS.get(course)!;
 };
 
 /**
- * The whole lesson map of an area at once. Every lesson keeps a fixed place
- * (each branch in its own column), so the map reads like a real map; the focused lesson is big and
- * the others shrink with their distance to it, down to unlabeled dots. Edges
+ * The whole lesson map of a course at once. Every lesson keeps a fixed place
+ * (each branch in its own column, at most four), so the map reads like a
+ * real map and never needs horizontal scrolling. Every lesson is the same
+ * size and named; the focused one is bigger. Edges
  * on the focus's lineage (what it comes from, what it opens) are
  * highlighted. Details and the start button live in a panel that sticks to
  * the bottom of the screen while the map is visible.
@@ -40,19 +43,19 @@ const layoutOf = (area: AreaId) => {
  * The focus lives in the URL (?focus=…), so the back button returns to the
  * previous focus.
  */
-export function SkillTree({ progress, area }: { progress: Progress | null; area: AreaId }) {
+export function SkillTree({ progress, course }: { progress: Progress | null; course: CourseId }) {
   const { t } = useI18n();
   const [params, setParams] = useSearchParams();
   const done = (id: string) => Boolean(progress?.lessons[id]);
   const statusOf = (l: Lesson): Status => (done(l.id) ? "done" : isUnlocked(l, done) ? "open" : "locked");
-  const LAYOUT = layoutOf(area);
+  const LAYOUT = layoutOf(course);
 
   const asked = getLesson(params.get("focus") ?? "");
-  const focus = asked?.area === area ? asked : recommendedLesson(done, area);
+  const focus = asked?.course === course ? asked : recommendedLesson(done, course);
   const go = (id: string) => setParams({ focus: id }, { preventScrollReset: true });
 
-  const { distance, ancestors, descendants } = useMemo(
-    () => ({ distance: distancesFrom(focus.id), ancestors: ancestorsOf(focus.id), descendants: descendantsOf(focus.id) }),
+  const { ancestors, descendants } = useMemo(
+    () => ({ ancestors: ancestorsOf(focus.id), descendants: descendantsOf(focus.id) }),
     [focus.id],
   );
   /** Edges on a chain through the focus: where it comes from and what it opens. */
@@ -73,9 +76,9 @@ export function SkillTree({ progress, area }: { progress: Progress | null; area:
     return () => ro.disconnect();
   }, []);
 
-  const height = TOP + (LAYOUT.rows - 1) * ROW_HEIGHT + 70;
+  const height = TOP + (LAYOUT.rows - 1) * ROW_HEIGHT + FOCUS / 2 + 64;
   const pos = new Map(LAYOUT.nodes.map((n) => [n.lesson.id, { x: n.x * width, y: TOP + n.row * ROW_HEIGHT }]));
-  const sizeOf = (id: string) => SIZES[Math.min(distance.get(id) ?? 3, 3)];
+  const sizeOf = (id: string) => (id === focus.id ? FOCUS : NODE);
   const completed = LAYOUT.nodes.filter((n) => done(n.lesson.id)).length;
 
   return (
@@ -104,29 +107,28 @@ export function SkillTree({ progress, area }: { progress: Progress | null; area:
 
         {LAYOUT.nodes.map(({ lesson, column }) => {
           const p = pos.get(lesson.id)!;
-          const dist = Math.min(distance.get(lesson.id) ?? 3, 3);
           const status = statusOf(lesson);
-          const slot = column === null ? 150 : Math.min(130, width / LAYOUT.columns);
+          const isFocus = lesson.id === focus.id;
+          const size = sizeOf(lesson.id);
+          // A branch node gets exactly its column, so nothing pokes out sideways.
+          const slot = column === null ? Math.min(200, width) : width / LAYOUT.columns;
           return (
             <button
               key={lesson.id}
               type="button"
-              className={`map-node dist-${dist} is-${status}${lesson.id === focus.id ? " is-focus" : ""}`}
-              style={{ left: p.x, top: p.y, width: slot }}
-              aria-current={lesson.id === focus.id ? "true" : undefined}
+              className={`map-node is-${status}${isFocus ? " is-focus" : ""}`}
+              style={{ left: p.x, top: p.y, width: slot, "--size": `${size}px` } as CSSProperties}
+              aria-current={isFocus ? "true" : undefined}
               aria-label={`${t(lessonTitleId(lesson))}. ${t(`home.status.${status}`)}`}
-              title={dist === 3 ? t(lessonTitleId(lesson)) : undefined}
               onClick={() => go(lesson.id)}
             >
-              <span className="map-bubble" style={{ width: SIZES[dist], height: SIZES[dist] }} aria-hidden="true">
-                {dist < 3 && <LessonGlyph glyph={lesson.glyph} />}
-                {status === "done" && dist < 3 && <span className="node-check">✓</span>}
+              <span className="map-bubble" style={{ width: size, height: size }} aria-hidden="true">
+                <LessonGlyph glyph={lesson.glyph} />
+                {status === "done" && <span className="node-check">✓</span>}
               </span>
-              {dist < 3 && (
-                <span className="map-label" aria-hidden="true">
-                  {t(lessonTitleId(lesson))}
-                </span>
-              )}
+              <span className="map-label" aria-hidden="true">
+                {t(lessonTitleId(lesson))}
+              </span>
             </button>
           );
         })}
