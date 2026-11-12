@@ -1,7 +1,7 @@
 import { MotionConfig } from "motion/react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import type { Catalog, Locale } from "./core/i18n";
-import { HomePage } from "./features/home/HomePage";
+import { HomePage, LastAreaRedirect } from "./features/home/HomePage";
 import { LessonPage } from "./features/lesson/LessonPage";
 import { ProgressProvider } from "./progress/ProgressContext";
 import type { ProgressRepository } from "./progress/repository";
@@ -20,7 +20,8 @@ export function App({ progressRepository, catalogs }: AppProps) {
       <ProgressProvider repository={progressRepository}>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<LastAreaRedirect />} />
+            <Route path="/:area" element={<HomePage />} />
             <Route path="/lesson/:lessonId" element={<LessonPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

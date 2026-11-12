@@ -78,7 +78,7 @@ export function LessonPlayer({ lesson, onRestart }: { lesson: Lesson; onRestart?
   return (
     <div className="lesson">
       <header className="lesson-top">
-        <Link to="/" className="icon-button" aria-label={t("lesson.exit")}>
+        <Link to={`/${lesson.area}?focus=${lesson.id}`} className="icon-button" aria-label={t("lesson.exit")}>
           <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
             <path d="M6 6 L18 18 M18 6 L6 18" />
           </svg>

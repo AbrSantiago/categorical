@@ -11,11 +11,13 @@ interface SliderProps {
   max: number;
   step: number;
   decimals?: number;
+  /** Text to show instead of the raw value (e.g. for sliders over a list of steps). */
+  display?: string;
   disabled?: boolean;
   onChange: (value: number) => void;
 }
 
-export function Slider({ symbol, name, value, min, max, step, decimals = 1, disabled, onChange }: SliderProps) {
+export function Slider({ symbol, name, value, min, max, step, decimals = 1, display, disabled, onChange }: SliderProps) {
   const id = useId();
   const { fmt } = useI18n();
   const fill = ((value - min) / (max - min)) * 100;
@@ -27,7 +29,7 @@ export function Slider({ symbol, name, value, min, max, step, decimals = 1, disa
           <span className="slider-name">{name}</span>
         </label>
         <output htmlFor={id} className="slider-value">
-          {fmt.num(value, decimals)}
+          {display ?? fmt.num(value, decimals)}
         </output>
       </div>
       <input
@@ -38,6 +40,7 @@ export function Slider({ symbol, name, value, min, max, step, decimals = 1, disa
         step={step}
         value={value}
         disabled={disabled}
+        aria-valuetext={display}
         style={{ "--fill": `${fill}%` } as CSSProperties}
         onChange={(e) => onChange(Number(e.target.value))}
       />

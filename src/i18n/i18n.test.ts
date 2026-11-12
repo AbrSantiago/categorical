@@ -59,7 +59,40 @@ const SAMPLE_ANSWERS: Record<string, (p: any) => unknown[]> = {
   "match-pairs": (p) => [p.items.map((_: unknown, i: number) => p.right.indexOf(i)), [0, 1, 2, 3], [3, 2, 1, 0]],
   "param-quiz": (p) => p.options,
   "true-false": () => ["true", "false"],
+  "classify-function": (p) => p.options,
+  "pick-graph": () => [0, 1, 2, 3],
+  "fit-transform": (p) => [
+    { a: p.target.a, h: p.target.h, k: p.target.k },
+    { a: 1, h: 0, k: 0 },
+    { a: 0, h: 0, k: 0 },
+    { a: -p.target.a, h: p.target.h + 1, k: p.target.k - 1 },
+    { a: p.target.a * 2, h: p.target.h, k: p.target.k },
+  ],
+  "squash-range": () => LINES,
+  "squash-domain": () => LINES,
+  "interval-quiz": () => [0, 1, 2, 3],
+  "evaluate-graph": (p) =>
+    p.variant === "value"
+      ? [
+          { point: { x: p.x0, y: p.c }, xs: [], none: false },
+          { point: { x: p.x0 + 1, y: p.c }, xs: [], none: false },
+          { point: { x: p.x0, y: p.c + 1 }, xs: [], none: false },
+        ]
+      : [
+          { point: null, xs: p.solutions, none: false },
+          { point: null, xs: [5], none: false },
+          { point: null, xs: [], none: true },
+        ],
+  injectivity: () => ["bijective", "injective", "surjective", "neither"],
+  inverse: () => [0, 1, 2, 3],
+  composition: () => [0, 1, 2, 3],
 };
+
+const LINES = [
+  { lo: -1, hi: 2, loClosed: true, hiClosed: true, hole: null },
+  { lo: -Infinity, hi: Infinity, loClosed: false, hiClosed: false, hole: 0 },
+  { lo: 2, hi: 2, loClosed: true, hiClosed: true, hole: null },
+];
 
 function feedbackMsgs(f: { headline: Msg; explanation: Msg[] }): Msg[] {
   return [f.headline, ...f.explanation];

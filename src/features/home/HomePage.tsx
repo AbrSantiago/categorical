@@ -1,20 +1,36 @@
-import { useState } from "react";
-import { Link } from "react-router";
-import { lessons, lessonTitleId, recommendedLesson } from "../../content/lessons";
+import { motion } from "motion/react";
+import { useEffect, useState } from "react";
+import { Link, Navigate, useParams } from "react-router";
+import { AREAS, lastOf, lessonsOf, lessonTitleId, recommendedLesson, type AreaId } from "../../content/lessons";
 import { currentStreak, dayKey } from "../../progress/model";
 import { useProgress } from "../../progress/ProgressContext";
 import { useI18n } from "../../settings/SettingsContext";
 import { SettingsMenu } from "../../settings/SettingsMenu";
 import { HeroCat } from "./HeroCat";
+import { AreaIcon } from "./AreaIcon";
+import { isArea, loadLastArea, saveLastArea } from "./lastArea";
 import { SkillTree } from "./SkillTree";
 
+/** "/" opens the area someone was last on. */
+export function LastAreaRedirect() {
+  return <Navigate to={`/${loadLastArea()}`} replace />;
+}
+
 export function HomePage() {
+  const { area } = useParams();
+  if (!isArea(area)) return <Navigate to="/" replace />;
+  return <AreaHome area={area} />;
+}
+
+function AreaHome({ area }: { area: AreaId }) {
   const { progress } = useProgress();
   const { t } = useI18n();
   const [today] = useState(() => dayKey(new Date()));
-  const completed = Object.keys(progress?.lessons ?? {}).length;
-  const allDone = completed >= lessons.length;
-  const next = recommendedLesson((id) => Boolean(progress?.lessons[id]));
+  useEffect(() => saveLastArea(area), [area]);
+  const own = lessonsOf(area);
+  const completed = own.filter((l) => progress?.lessons[l.id]).length;
+  const allDone = completed >= own.length;
+  const next = recommendedLesson((id) => Boolean(progress?.lessons[id]), area);
   const nextTitle = t(lessonTitleId(next));
   const streak = progress ? currentStreak(progress, today) : 0;
   const cta = allDone
@@ -52,18 +68,36 @@ export function HomePage() {
         </div>
       </header>
 
+      <AreaTabs current={area} />
+
       <section className="hero">
-        <HeroCat />
+        <HeroCat key={area} area={area} />
         <div className="hero-copy">
-          <h1>{t("home.hero.title")}</h1>
-          <p>{t("home.hero.body")}</p>
-          <Link to={`/lesson/${allDone ? "repaso" : next.id}`} className="button primary">
+          <h1>{t(`home.hero.${area}.title`)}</h1>
+          <p>{t(`home.hero.${area}.body`)}</p>
+          <Link to={`/lesson/${allDone ? lastOf(area).id : next.id}`} className="button primary">
             {cta}
           </Link>
         </div>
       </section>
 
-      <SkillTree progress={progress} />
+      <SkillTree progress={progress} area={area} />
     </div>
+  );
+}
+
+/** Switch between subjects; each one has its own map. */
+function AreaTabs({ current }: { current: AreaId }) {
+  const { t } = useI18n();
+  return (
+    <nav className="area-tabs" aria-label={t("home.areas")}>
+      {AREAS.map((a) => (
+        <Link key={a} to={`/${a}`} className={`area-tab${a === current ? " is-current" : ""}`} aria-current={a === current ? "page" : undefined}>
+          {a === current && <motion.span layoutId="area-thumb" className="area-thumb" transition={{ type: "spring", stiffness: 500, damping: 38 }} />}
+          <AreaIcon area={a} />
+          <span>{t(`home.area.${a}`)}</span>
+        </Link>
+      ))}
+    </nav>
   );
 }

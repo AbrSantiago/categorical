@@ -7,6 +7,15 @@ import { matchPairs } from "./match-pairs";
 import { paramQuiz } from "./param-quiz";
 import { pickCurve } from "./pick-curve";
 import { trueFalse } from "./true-false";
+import { classifyFunction } from "./classify-function";
+import { composition } from "./composition";
+import { evaluateGraph } from "./evaluate-graph";
+import { fitTransform } from "./fit-transform";
+import { injectivity } from "./injectivity";
+import { intervalQuiz } from "./interval-quiz";
+import { inverse } from "./inverse";
+import { pickGraph } from "./pick-graph";
+import { squashDomain, squashRange } from "./squash";
 
 // Each type has its own params/answer shapes; the registry erases them.
 // oxlint-disable-next-line typescript/no-explicit-any
@@ -22,6 +31,17 @@ export const exerciseTypes: Record<string, AnyExerciseType> = {
   [matchPairs.id]: matchPairs,
   [paramQuiz.id]: paramQuiz,
   [trueFalse.id]: trueFalse,
+  // Functions
+  [classifyFunction.id]: classifyFunction,
+  [pickGraph.id]: pickGraph,
+  [fitTransform.id]: fitTransform,
+  [squashRange.id]: squashRange,
+  [squashDomain.id]: squashDomain,
+  [intervalQuiz.id]: intervalQuiz,
+  [evaluateGraph.id]: evaluateGraph,
+  [injectivity.id]: injectivity,
+  [inverse.id]: inverse,
+  [composition.id]: composition,
 };
 
 export function getExerciseType(id: string): AnyExerciseType {
